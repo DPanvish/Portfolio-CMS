@@ -3,7 +3,7 @@
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { GitHub } from "lucide-react";
+import { FaGithub } from "react-icons/fa"; 
 
 export default function Login() {
   const { data: session, status } = useSession();
@@ -27,7 +27,7 @@ export default function Login() {
           onClick={() => signIn("github", { callbackUrl: "/admin" })}
           className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-xl hover:bg-neutral-200 transition-colors"
         >
-          <Github className="w-5 h-5" />
+          <FaGithub className="text-xl" />
           Authorize via GitHub
         </button>
       </div>
