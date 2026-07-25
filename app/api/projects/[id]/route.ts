@@ -5,10 +5,7 @@ import connectToDatabase from "@/lib/mongodb";
 import Project from "@/models/Project";
 
 // SECURE: Update an existing project
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
@@ -17,9 +14,10 @@ export async function PUT(
 
     await connectToDatabase();
     const body = await request.json();
+    const {id} = await params;
 
     const updatedProject = await Project.findByIdAndUpdate(
-      params.id, 
+      id, 
       body, 
       { new: true, runValidators: true } 
     );
