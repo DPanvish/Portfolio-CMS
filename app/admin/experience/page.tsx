@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ExperienceModal from "@/components/ExperienceModal";
+import { Trash2, Edit2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Experience {
   _id: string;
@@ -19,11 +21,28 @@ const fetchExperience = async (): Promise<Experience[]> => {
 };
 
 export default function AdminExperience() {
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<Experience | null>(null);
   
   const { data: experience, isLoading, isError } = useQuery({
     queryKey: ["experience"],
     queryFn: fetchExperience,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/experience/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete experience");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["experience"] });
+      toast.success("Milestone deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete milestone");
+    }
   });
 
   return (
@@ -36,7 +55,10 @@ export default function AdminExperience() {
             <p className="text-zinc-500 font-light tracking-wide text-sm uppercase">Professional Trajectory Management</p>
           </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setEditItem(null);
+              setIsModalOpen(true);
+            }}
             className="px-6 py-3 bg-transparent border border-white/20 text-white text-sm font-medium rounded-full hover:bg-white hover:text-black transition-all duration-300"
           >
             Add Career Milestone
@@ -71,7 +93,33 @@ export default function AdminExperience() {
                 </div>
 
                 <div className="flex flex-col items-end gap-3">
-                  <span className="text-[10px] tracking-widest uppercase text-zinc-600">Distribution Targets</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] tracking-widest uppercase text-zinc-600">Distribution Targets</span>
+                    
+                    <button 
+                      onClick={() => {
+                        setEditItem(job);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-zinc-400 hover:text-white transition-colors"
+                      title="Edit Experience"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Delete this experience?")) {
+                          deleteMutation.mutate(job._id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-500/70 hover:text-red-500 transition-colors disabled:opacity-50"
+                      title="Delete Experience"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                   <div className="flex gap-2">
                     {job.portfolios.map(p => (
                       <div key={p} className="px-2 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-500/80 uppercase tracking-wider">
@@ -93,7 +141,7 @@ export default function AdminExperience() {
         )}
       </div>
 
-      <ExperienceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ExperienceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} editItem={editItem} />
     </div>
   );
 }

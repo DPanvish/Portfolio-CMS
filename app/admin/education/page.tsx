@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import EducationModal from "@/components/EducationModal";
+import { Trash2, Edit2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminEducation() {
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<any>(null);
   
   const { data: education, isLoading, isError } = useQuery({
     queryKey: ["education"],
@@ -14,6 +18,21 @@ export default function AdminEducation() {
       if (!res.ok) throw new Error("Failed to fetch");
       return res.json();
     },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/education/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete education");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["education"] });
+      toast.success("Academic record deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete academic record");
+    }
   });
 
   return (
@@ -25,7 +44,10 @@ export default function AdminEducation() {
             <h1 className="text-4xl font-light tracking-tight mb-2">Education</h1>
             <p className="text-zinc-500 font-light tracking-wide text-sm uppercase">Academic Foundation Management</p>
           </div>
-          <button onClick={() => setIsModalOpen(true)}
+          <button onClick={() => {
+              setEditItem(null);
+              setIsModalOpen(true);
+            }}
             className="px-6 py-3 bg-transparent border border-white/20 text-white text-sm font-medium rounded-full hover:bg-white hover:text-black transition-all duration-300">
             Add Academic Record
           </button>
@@ -48,6 +70,33 @@ export default function AdminEducation() {
                     {edu.period}
                   </span>
                 </div>
+                <div className="flex flex-col items-end gap-3">
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => {
+                        setEditItem(edu);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-zinc-400 hover:text-white transition-colors"
+                      title="Edit Education"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Delete this academic record?")) {
+                          deleteMutation.mutate(edu._id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-500/70 hover:text-red-500 transition-colors disabled:opacity-50"
+                      title="Delete Education"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
             {education?.length === 0 && (
@@ -58,7 +107,7 @@ export default function AdminEducation() {
           </div>
         )}
       </div>
-      <EducationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <EducationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} editItem={editItem} />
     </div>
   );
 }

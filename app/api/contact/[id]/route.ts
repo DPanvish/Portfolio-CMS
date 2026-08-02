@@ -7,7 +7,7 @@ import Message from "@/models/Message";
 // SECURE: Mark a message as read
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,9 +16,10 @@ export async function PATCH(
     }
 
     await connectToDatabase();
+    const { id } = await params;
     
     const updatedMessage = await Message.findByIdAndUpdate(
-      params.id, 
+      id, 
       { isRead: true }, 
       { new: true }
     );
@@ -36,7 +37,7 @@ export async function PATCH(
 // SECURE: Delete a message
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -45,8 +46,9 @@ export async function DELETE(
     }
 
     await connectToDatabase();
+    const { id } = await params;
     
-    const deletedMessage = await Message.findByIdAndDelete(params.id);
+    const deletedMessage = await Message.findByIdAndDelete(id);
     
     if (!deletedMessage) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 });
