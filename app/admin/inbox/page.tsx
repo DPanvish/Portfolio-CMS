@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, MailOpen, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
   _id: string;
@@ -35,7 +36,11 @@ export default function AdminInbox() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      toast.success("Message marked as read");
     },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update status");
+    }
   });
 
   const deleteMutation = useMutation({
@@ -46,7 +51,11 @@ export default function AdminInbox() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      toast.success("Message purged successfully");
     },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to purge message");
+    }
   });
 
   return (

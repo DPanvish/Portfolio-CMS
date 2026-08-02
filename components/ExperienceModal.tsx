@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 interface ExperienceModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editItem?: any;
 }
 
-export default function ExperienceModal({ isOpen, onClose }: ExperienceModalProps) {
+export default function ExperienceModal({ isOpen, onClose, editItem }: ExperienceModalProps) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     role: "",
@@ -19,21 +21,43 @@ export default function ExperienceModal({ isOpen, onClose }: ExperienceModalProp
     portfolios: ["all"],
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (editItem) {
+        setFormData({
+          role: editItem.role || "",
+          company: editItem.company || "",
+          period: editItem.period || "",
+          description: editItem.description || "",
+          portfolios: editItem.portfolios || ["all"],
+        });
+      } else {
+        setFormData({ role: "", company: "", period: "", description: "", portfolios: ["all"] });
+      }
+    }
+  }, [editItem, isOpen]);
+
   const mutation = useMutation({
     mutationFn: async (newExp: typeof formData) => {
-      const res = await fetch("/api/experience", {
-        method: "POST",
+      const url = editItem ? `/api/experience/${editItem._id}` : "/api/experience";
+      const method = editItem ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newExp),
       });
-      if (!res.ok) throw new Error("Failed to create experience");
+      if (!res.ok) throw new Error("Failed to save experience");
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["experience"] });
       onClose();
-      setFormData({ role: "", company: "", period: "", description: "", portfolios: ["all"] });
+      toast.success(editItem ? "Milestone updated successfully!" : "Career milestone added!");
     },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to save milestone");
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +84,7 @@ export default function ExperienceModal({ isOpen, onClose }: ExperienceModalProp
       <div className="relative w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh]">
         
         <div className="flex justify-between items-center p-6 border-b border-white/5">
-          <h2 className="text-xl font-light tracking-widest uppercase text-white">Add Career Milestone</h2>
+          <h2 className="text-xl font-light tracking-widest uppercase text-white">{editItem ? "Edit Milestone" : "Add Career Milestone"}</h2>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -121,7 +145,7 @@ export default function ExperienceModal({ isOpen, onClose }: ExperienceModalProp
           <button type="submit" form="experience-form" disabled={mutation.isPending}
             className="px-6 py-2.5 bg-white text-zinc-950 text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
           >
-            {mutation.isPending ? "Saving..." : "Add to Trajectory"}
+            {mutation.isPending ? "Saving..." : editItem ? "Update Trajectory" : "Add to Trajectory"}
           </button>
         </div>
 

@@ -27,10 +27,17 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
     const body = await request.json();
+    
+    // Remove empty _id to prevent Mongoose CastError
+    if (!body._id) {
+      delete body._id;
+    }
+
     const newAbout = await About.create(body);
     
     return NextResponse.json(newAbout, { status: 201 });
   } catch (error) {
+    console.error("POST /api/about error:", error);
     return NextResponse.json({ error: "Create failed" }, { status: 500 });
   }
 }

@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, UploadCloud, Loader2, CheckCircle2 } from "lucide-react"; 
+import { toast } from "sonner";
 
 interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editItem?: any;
 }
 
-export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
+export default function ProjectModal({ isOpen, onClose, editItem }: ProjectModalProps) {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,6 +24,24 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
     portfolios: ["all"],
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (editItem) {
+        setFormData({
+          title: editItem.title || "",
+          description: editItem.description || "",
+          techStack: editItem.techStack ? editItem.techStack.join(", ") : "",
+          thumbnailUrl: editItem.thumbnailUrl || "",
+          githubUrl: editItem.githubUrl || "",
+          liveUrl: editItem.liveUrl || "",
+          portfolios: editItem.portfolios || ["all"],
+        });
+      } else {
+        setFormData({ title: "", description: "", techStack: "", thumbnailUrl: "", githubUrl: "", liveUrl: "", portfolios: ["all"] });
+      }
+    }
+  }, [editItem, isOpen]);
+
   const mutation = useMutation({
     mutationFn: async (newProject: typeof formData) => {
       const payload = {
@@ -29,19 +49,25 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
         techStack: newProject.techStack.split(",").map((t) => t.trim()).filter(Boolean),
       };
 
-      const res = await fetch("/api/projects", {
-        method: "POST",
+      const url = editItem ? `/api/projects/${editItem._id}` : "/api/projects";
+      const method = editItem ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to create project");
+      if (!res.ok) throw new Error("Failed to save project");
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       onClose();
-      setFormData({ title: "", description: "", techStack: "", thumbnailUrl: "", githubUrl: "", liveUrl: "", portfolios: ["all"] });
+      toast.success(editItem ? "Project updated successfully!" : "Project deployed successfully!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to save project");
     },
   });
 
@@ -65,10 +91,13 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
       
       if (data.secure_url) {
         setFormData((prev) => ({ ...prev, thumbnailUrl: data.secure_url }));
+        toast.success("Image uploaded to secure cloud!");
+      } else {
+        toast.error("Failed to get image URL");
       }
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Image upload failed. Check your Cloudinary configuration.");
+      toast.error("Image upload failed. Check your Cloudinary configuration.");
     } finally {
       setIsUploading(false);
     }
@@ -77,7 +106,7 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.thumbnailUrl) {
-      alert("Please upload a cover image before deploying.");
+      toast.error("Please upload a cover image before deploying.");
       return;
     }
     mutation.mutate(formData);
@@ -102,7 +131,7 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
       <div className="relative w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh]">
         
         <div className="flex justify-between items-center p-6 border-b border-white/5">
-          <h2 className="text-xl font-light tracking-widest uppercase text-white">Initialize Project</h2>
+          <h2 className="text-xl font-light tracking-widest uppercase text-white">{editItem ? "Edit Project" : "Initialize Project"}</h2>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -207,7 +236,7 @@ export default function ProjectModal({ isOpen, onClose }: ProjectModalProps) {
             disabled={mutation.isPending || isUploading}
             className="px-6 py-2.5 bg-white text-zinc-950 text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50"
           >
-            {mutation.isPending ? "Deploying..." : "Deploy to Database"}
+            {mutation.isPending ? "Saving..." : editItem ? "Update Project" : "Deploy to Database"}
           </button>
         </div>
 

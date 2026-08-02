@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ProjectModal from "@/components/ProjectModal";
+import { Trash2, Edit2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Project {
   _id: string;
@@ -18,11 +20,28 @@ const fetchProjects = async (): Promise<Project[]> => {
 };
 
 export default function AdminProjects() {
+  const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState<Project | null>(null);
   
   const { data: projects, isLoading, isError } = useQuery({
     queryKey: ["projects"],
     queryFn: fetchProjects,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete project");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Project deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete project");
+    }
   });
 
   return (
@@ -36,7 +55,10 @@ export default function AdminProjects() {
             <p className="text-zinc-500 font-light tracking-wide text-sm uppercase">Database Architecture Management</p>
           </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setEditItem(null);
+              setIsModalOpen(true);
+            }}
             className="px-6 py-3 bg-transparent border border-white/20 text-white text-sm font-medium rounded-full hover:bg-white hover:text-black transition-all duration-300"
           >
             Deploy New Project
@@ -73,7 +95,33 @@ export default function AdminProjects() {
                 </div>
 
                 <div className="flex flex-col items-end gap-3">
-                  <span className="text-[10px] tracking-widest uppercase text-zinc-600">Distribution Targets</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] tracking-widest uppercase text-zinc-600">Distribution Targets</span>
+                    
+                    <button 
+                      onClick={() => {
+                        setEditItem(project);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-zinc-400 hover:text-white transition-colors"
+                      title="Edit Project"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Delete this project?")) {
+                          deleteMutation.mutate(project._id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                      className="text-red-500/70 hover:text-red-500 transition-colors disabled:opacity-50"
+                      title="Delete Project"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                   <div className="flex gap-2">
                     {project.portfolios.map(p => (
                       <div key={p} className="px-2 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-500/80 uppercase tracking-wider">
@@ -95,7 +143,7 @@ export default function AdminProjects() {
         )}
       </div>
 
-      <ProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} editItem={editItem} />
     </div>
   );
 }

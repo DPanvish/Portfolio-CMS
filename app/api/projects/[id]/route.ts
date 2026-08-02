@@ -35,7 +35,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 // SECURE: Delete a project
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -45,7 +45,8 @@ export async function DELETE(
 
     await connectToDatabase();
     
-    const deletedProject = await Project.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const deletedProject = await Project.findByIdAndDelete(id);
     
     if (!deletedProject) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });

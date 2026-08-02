@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 interface EducationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  editItem?: any;
 }
 
-export default function EducationModal({ isOpen, onClose }: EducationModalProps) {
+export default function EducationModal({ isOpen, onClose, editItem }: EducationModalProps) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     degree: "",
@@ -19,6 +21,22 @@ export default function EducationModal({ isOpen, onClose }: EducationModalProps)
     portfolios: ["all"],
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (editItem) {
+        setFormData({
+          degree: editItem.degree || "",
+          institution: editItem.institution || "",
+          period: editItem.period || "",
+          details: editItem.details ? editItem.details.join("\n") : "",
+          portfolios: editItem.portfolios || ["all"],
+        });
+      } else {
+        setFormData({ degree: "", institution: "", period: "", details: "", portfolios: ["all"] });
+      }
+    }
+  }, [editItem, isOpen]);
+
   const mutation = useMutation({
     mutationFn: async (newEdu: typeof formData) => {
       const payload = {
@@ -26,19 +44,25 @@ export default function EducationModal({ isOpen, onClose }: EducationModalProps)
         details: newEdu.details.split("\n").map((d) => d.trim()).filter(Boolean),
       };
 
-      const res = await fetch("/api/education", {
-        method: "POST",
+      const url = editItem ? `/api/education/${editItem._id}` : "/api/education";
+      const method = editItem ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to add education");
+      if (!res.ok) throw new Error("Failed to save education");
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["education"] });
       onClose();
-      setFormData({ degree: "", institution: "", period: "", details: "", portfolios: ["all"] });
+      toast.success(editItem ? "Academic record updated successfully!" : "Academic record added!");
     },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to save academic record");
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,7 +86,7 @@ export default function EducationModal({ isOpen, onClose }: EducationModalProps)
 
       <div className="relative w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-[0_0_40px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-6 border-b border-white/5">
-          <h2 className="text-xl font-light tracking-widest uppercase text-white">Add Academic Record</h2>
+          <h2 className="text-xl font-light tracking-widest uppercase text-white">{editItem ? "Edit Academic Record" : "Add Academic Record"}</h2>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -117,7 +141,7 @@ export default function EducationModal({ isOpen, onClose }: EducationModalProps)
           <button type="button" onClick={onClose} className="px-6 py-2.5 text-sm font-medium text-zinc-400 hover:text-white transition-colors">Cancel</button>
           <button type="submit" form="education-form" disabled={mutation.isPending}
             className="px-6 py-2.5 bg-white text-zinc-950 text-sm font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-50">
-            {mutation.isPending ? "Saving..." : "Add to Academic History"}
+            {mutation.isPending ? "Saving..." : editItem ? "Update Academic History" : "Add to Academic History"}
           </button>
         </div>
       </div>
