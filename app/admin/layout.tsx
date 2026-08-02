@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Briefcase, GraduationCap, User, LogOut } from "lucide-react";
+import { LayoutDashboard, Briefcase, GraduationCap, User, LogOut, Inbox } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (status === "loading") return <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center">Authenticating...</div>;
 
   const navItems = [
+    { name: "Inbox", path: "/admin/inbox", icon: <Inbox className="w-5 h-5" /> },
     { name: "Projects", path: "/admin", icon: <LayoutDashboard className="w-5 h-5" /> },
     { name: "Experience", path: "/admin/experience", icon: <Briefcase className="w-5 h-5" /> },
     { name: "Education", path: "/admin/education", icon: <GraduationCap className="w-5 h-5" /> },
