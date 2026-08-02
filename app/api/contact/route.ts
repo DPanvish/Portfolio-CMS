@@ -27,3 +27,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to send message" }, { status: 500 });
   }
 }
+
+// SECURE: Fetch all messages (Only you can do this)
+export async function GET(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    await connectToDatabase();
+    // Fetch messages, newest first
+    const messages = await Message.find().sort({ createdAt: -1 });
+    
+    return NextResponse.json(messages, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 });
+  }
+}
