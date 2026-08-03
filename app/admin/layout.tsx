@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, Briefcase, GraduationCap, User, LogOut, Inbox } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -31,8 +32,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex bg-neutral-950 text-white">
       {/* Sidebar */}
       <aside className="w-64 border-r border-neutral-800 flex flex-col bg-neutral-900/30">
-        <div className="p-6 border-b border-neutral-800">
-          <h2 className="text-xl font-bold tracking-tighter">Command Center</h2>
+        <div className="p-6 border-b border-neutral-800 flex items-center gap-3">
+          <div className="w-8 h-8 rounded overflow-hidden flex-shrink-0">
+            <Image src="/logo.svg" alt="Portfolio CMS Logo" width={32} height={32} className="object-cover" />
+          </div>
+          <h2 className="text-xl font-bold tracking-tighter">Portfolio CMS</h2>
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => (

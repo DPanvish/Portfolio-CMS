@@ -1,0 +1,13 @@
+<svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Box -->
+  <rect x="30" y="30" width="180" height="180" rx="40" stroke="url(#amber)" stroke-width="24" />
+  <!-- Inner Data -->
+  <rect x="80" y="85" width="80" height="24" rx="12" fill="#ffffff" />
+  <rect x="80" y="135" width="48" height="24" rx="12" fill="#ffffff" />
+</svg>
