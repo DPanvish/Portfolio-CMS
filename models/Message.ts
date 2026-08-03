@@ -4,7 +4,6 @@ export interface IMessage extends Document {
   name: string;
   email: string;
   message: string;
-  portfolioSource: string;
   isRead: boolean;
 }
 
@@ -21,10 +20,6 @@ const MessageSchema: Schema = new Schema(
     message: { 
       type: String, 
       required: true 
-    },
-    portfolioSource: { 
-      type: String, 
-      default: "unknown" 
     },
     isRead: { 
       type: Boolean, 

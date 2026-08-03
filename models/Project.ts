@@ -7,7 +7,6 @@ export interface IProject extends Document {
   thumbnailUrl: string;
   githubUrl?: string;
   liveUrl?: string;
-  portfolios: string[]; 
   order: number;
 }
 
@@ -19,11 +18,6 @@ const ProjectSchema: Schema = new Schema(
     thumbnailUrl: { type: String, required: true },
     githubUrl: { type: String },
     liveUrl: { type: String },
-    portfolios: { 
-      type: [String], 
-      default: ["all"],
-      enum: ["scroll-story", "minimalist", "3d-webgl", "terminal", "all"]
-    },
     order: { type: Number, default: 0 },
   },
   { timestamps: true }

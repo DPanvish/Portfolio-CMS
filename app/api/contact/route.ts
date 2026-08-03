@@ -24,7 +24,6 @@ export async function POST(request: Request) {
       name: body.name,
       email: body.email,
       message: body.message,
-      portfolioSource: body.portfolioSource || "unknown",
     });
 
     // Dispatch the real-time email alert
@@ -74,11 +73,7 @@ export async function POST(request: Request) {
                           </td>
                         </tr>
                         <tr>
-                          <td width="50%">
-                            <p style="margin: 0; font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px;">Target Vector</p>
-                            <p style="margin: 6px 0 0 0; font-size: 14px; color: #a1a1aa;">${body.portfolioSource}</p>
-                          </td>
-                          <td width="50%">
+                          <td width="100%" colspan="2">
                             <p style="margin: 0; font-size: 10px; color: #71717a; text-transform: uppercase; letter-spacing: 1.5px;">Timestamp</p>
                             <p style="margin: 6px 0 0 0; font-size: 14px; color: #a1a1aa;">${new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })} (IST)</p>
                           </td>

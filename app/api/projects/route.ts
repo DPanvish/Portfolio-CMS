@@ -9,15 +9,7 @@ export async function GET(request: Request) {
   try {
     await connectToDatabase();
     
-    const { searchParams } = new URL(request.url);
-    const portfolioTarget = searchParams.get("portfolio");
-
-    let query = {};
-    if (portfolioTarget) {
-      query = { portfolios: { $in: ["all", portfolioTarget] } };
-    }
-
-    const projects = await Project.find(query).sort({ order: 1, createdAt: -1 });
+    const projects = await Project.find().sort({ order: 1, createdAt: -1 });
     return NextResponse.json(projects, { status: 200 });
     
   } catch (error) {

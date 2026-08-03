@@ -18,7 +18,6 @@ export default function ExperienceModal({ isOpen, onClose, editItem }: Experienc
     company: "",
     period: "",
     description: "",
-    portfolios: ["all"],
   });
 
   useEffect(() => {
@@ -29,10 +28,9 @@ export default function ExperienceModal({ isOpen, onClose, editItem }: Experienc
           company: editItem.company || "",
           period: editItem.period || "",
           description: editItem.description || "",
-          portfolios: editItem.portfolios || ["all"],
         });
       } else {
-        setFormData({ role: "", company: "", period: "", description: "", portfolios: ["all"] });
+        setFormData({ role: "", company: "", period: "", description: "" });
       }
     }
   }, [editItem, isOpen]);
@@ -65,15 +63,6 @@ export default function ExperienceModal({ isOpen, onClose, editItem }: Experienc
     mutation.mutate(formData);
   };
 
-  const handlePortfolioToggle = (target: string) => {
-    setFormData((prev) => {
-      const current = prev.portfolios;
-      if (current.includes(target)) {
-        return { ...prev, portfolios: current.filter((p) => p !== target) };
-      }
-      return { ...prev, portfolios: [...current, target] };
-    });
-  };
 
   if (!isOpen) return null;
 
@@ -118,23 +107,7 @@ export default function ExperienceModal({ isOpen, onClose, editItem }: Experienc
                 className="w-full bg-zinc-900/50 border border-white/5 rounded-lg px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition-all resize-none" placeholder="Solved real-life coding problems and architected client solutions..." />
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-white/5">
-              <label className="text-xs uppercase tracking-widest text-zinc-500 font-medium">Deployment Targets</label>
-              <div className="flex flex-wrap gap-3">
-                {["all", "scroll-story", "minimalist", "3d-webgl", "terminal"].map((target) => {
-                  const isActive = formData.portfolios.includes(target);
-                  return (
-                    <button type="button" key={target} onClick={() => handlePortfolioToggle(target)}
-                      className={`px-4 py-2 rounded-full text-xs font-medium tracking-wide border transition-all ${
-                        isActive ? "bg-amber-500/10 border-amber-500/50 text-amber-500" : "bg-transparent border-white/10 text-zinc-400 hover:border-white/30"
-                      }`}
-                    >
-                      {target}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+
           </form>
         </div>
 

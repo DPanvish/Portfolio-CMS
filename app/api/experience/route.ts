@@ -7,11 +7,7 @@ import Experience from "@/models/Experience";
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
-    const { searchParams } = new URL(request.url);
-    const portfolioTarget = searchParams.get("portfolio");
-
-    const query = portfolioTarget ? { portfolios: { $in: ["all", portfolioTarget] } } : {};
-    const experience = await Experience.find(query).sort({ order: 1, createdAt: -1 });
+    const experience = await Experience.find().sort({ order: 1, createdAt: -1 });
     
     return NextResponse.json(experience, { status: 200 });
   } catch (error) {

@@ -12,7 +12,6 @@ export default function AdminAbout() {
     bio: "",
     skills: "",
     resumeUrl: "",
-    portfolios: ["all"],
   });
 
   const { data: aboutData, isLoading } = useQuery({
@@ -33,7 +32,6 @@ export default function AdminAbout() {
         bio: aboutData.bio || "",
         skills: aboutData.skills ? aboutData.skills.join(", ") : "",
         resumeUrl: aboutData.resumeUrl || "",
-        portfolios: aboutData.portfolios || ["all"],
       });
     }
   }, [aboutData]);

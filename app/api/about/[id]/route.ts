@@ -20,13 +20,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user?.email !== process.env.ADMIN_EMAIL) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectToDatabase();
-    const deletedAbout = await About.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const deletedAbout = await About.findByIdAndDelete(id);
     
     return deletedAbout ? NextResponse.json({ message: "Deleted" }, { status: 200 }) : NextResponse.json({ error: "Not found" }, { status: 404 });
   } catch (error) {

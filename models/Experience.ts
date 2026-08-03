@@ -5,7 +5,6 @@ export interface IExperience extends Document {
   company: string;
   period: string;
   description: string;
-  portfolios: string[];
   order: number;
 }
 
@@ -15,11 +14,6 @@ const ExperienceSchema: Schema = new Schema(
     company: { type: String, required: true },
     period: { type: String, required: true },
     description: { type: String, required: true },
-    portfolios: { 
-      type: [String], 
-      default: ["all"],
-      enum: ["scroll-story", "minimalist", "3d-webgl", "terminal", "all"]
-    },
     order: { type: Number, default: 0 },
   },
   { timestamps: true }

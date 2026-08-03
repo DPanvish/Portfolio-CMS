@@ -7,12 +7,7 @@ import About from "@/models/About";
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
-    const { searchParams } = new URL(request.url);
-    const portfolioTarget = searchParams.get("portfolio");
-
-    const query = portfolioTarget ? { portfolios: { $in: ["all", portfolioTarget] } } : {};
-
-    const about = await About.findOne(query).sort({ createdAt: -1 }); 
+    const about = await About.findOne().sort({ createdAt: -1 }); 
     
     return NextResponse.json(about || {}, { status: 200 });
   } catch (error) {

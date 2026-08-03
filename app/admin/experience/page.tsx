@@ -11,7 +11,6 @@ interface Experience {
   role: string;
   company: string;
   period: string;
-  portfolios: string[];
 }
 
 const fetchExperience = async (): Promise<Experience[]> => {
@@ -94,7 +93,7 @@ export default function AdminExperience() {
 
                 <div className="flex flex-col items-end gap-3">
                   <div className="flex items-center gap-4">
-                    <span className="text-[10px] tracking-widest uppercase text-zinc-600">Distribution Targets</span>
+                    <span className="text-[10px] tracking-widest uppercase text-zinc-600">Actions</span>
                     
                     <button 
                       onClick={() => {
@@ -119,13 +118,6 @@ export default function AdminExperience() {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  </div>
-                  <div className="flex gap-2">
-                    {job.portfolios.map(p => (
-                      <div key={p} className="px-2 py-1 rounded border border-amber-500/20 bg-amber-500/5 text-[10px] text-amber-500/80 uppercase tracking-wider">
-                        {p}
-                      </div>
-                    ))}
                   </div>
                 </div>
 

@@ -5,7 +5,6 @@ export interface IAbout extends Document {
   bio: string;
   skills: string[]; 
   resumeUrl?: string; 
-  portfolios: string[];
 }
 
 const AboutSchema: Schema = new Schema(
@@ -13,12 +12,7 @@ const AboutSchema: Schema = new Schema(
     tagline: { type: String, required: true },
     bio: { type: String, required: true },
     skills: [{ type: String }],
-    resumeUrl: { type: String },
-    portfolios: { 
-      type: [String], 
-      default: ["all"],
-      enum: ["scroll-story", "minimalist", "3d-webgl", "terminal", "all"]
-    }
+    resumeUrl: { type: String }
   },
   { timestamps: true }
 );

@@ -7,11 +7,7 @@ import Education from "@/models/Education";
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
-    const { searchParams } = new URL(request.url);
-    const portfolioTarget = searchParams.get("portfolio");
-
-    const query = portfolioTarget ? { portfolios: { $in: ["all", portfolioTarget] } } : {};
-    const education = await Education.find(query).sort({ order: 1, createdAt: -1 });
+    const education = await Education.find().sort({ order: 1, createdAt: -1 });
     
     return NextResponse.json(education, { status: 200 });
   } catch (error) {

@@ -9,7 +9,6 @@ interface Message {
   name: string;
   email: string;
   message: string;
-  portfolioSource: string;
   isRead: boolean;
   createdAt: string;
 }
@@ -116,13 +115,6 @@ export default function AdminInbox() {
                       </a>
                     </div>
                     
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">Source</p>
-                      <span className="px-2 py-1 rounded border border-white/10 bg-white/5 text-[10px] text-zinc-400 uppercase tracking-wider">
-                        {msg.portfolioSource}
-                      </span>
-                    </div>
-
                     <div>
                       <p className="text-[10px] uppercase tracking-widest text-zinc-600 mb-1">Received</p>
                       <p className="text-xs text-zinc-400 font-light">
